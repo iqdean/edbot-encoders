@@ -1,0 +1,1 @@
+myTestLib.o: myTestLib.c
