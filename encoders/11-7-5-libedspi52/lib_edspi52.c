@@ -132,47 +132,6 @@ __/    Transmission cycle is terminated by L->H on SS/ (chip select)
 
 #define MDR1_en32 0x00	// enable counting w 32bit counter
 
-/* -------------- Globals ------------------- 
-Q: HMM, will globals work in a shared library ???
-
-A "global" variable in a library function is "global" within the library
-   per C variable scope rules, but, not visible outside the library
-
-REFS:
-http://www.tutorialspoint.com/cprogramming/c_scope_rules.htm
-http://stackoverflow.com/questions/19373061/
-what-happens-to-global-and-static-variables-in-a-shared-library-when-it-is-dynam
-
-SO: 
-    we can leave these globals as is
----------------------------------------------*/
-
-// ---- SAGA of the GPIO's used for Robogia LS7366 Chip Selects ----
-/*
- * [2] Robogia 3axis encoder decode shield wires the X-axis ls7366 chipset to arduino gpio 10
- *     & all 3 ls7366 decoders are connected to SPI0 on the arduino ICSP connector.
- *     The Intel Galileo Gen1 board muxes arduino GPIO10 w SPI0 CS
- *     the idoitic hw ?or? sw (libmraa) doesn't allow
- *     galileo gpio 10 to be used as a regular GPIO (instead of SPI0 CS) when use of spi0 is enabled
- *     >> every serial exchange on spi0 is windowed by the spi0 cs, which shows up on gpio10 <<
- *
- *     WORKAROUND:
- *     1. on robogia, bend gpio pin10 up so it doesn't connect to galileo SPI0_CS on gpio10
- *        when the 2 boards are mated
- *     2. on robogio, jumper gpio7 to gpio10
- *     3. in galileo sw, use gpio7 instead of gpio10 to drive X-axis chip select
- */
-
-//int csX = 7;	// X axis LS7366r CS  gpio 7  [2]
-//int csY = 9;    // Y axis LS7366r CS  gpio 9
-//int csZ = 8;    // Z axis LS7366r CS  gpio 8
-
-// Update spi52.c for Gen2 board:
-
-//int csX = 10;	// X axis LS7366r CS  gpio 10
-//int csY = 9;    // Y axis LS7366r CS  gpio 9
-//int csZ = 8;    // Z axis LS7366r CS  gpio 8
-
 // Update to match HW Config used for AxisEncoderShield4.ino
 // chg'd to move all 3 gpio's into the same cluster so we could use r/m/w fastgpio macros
 // int csX = 5;
@@ -180,35 +139,8 @@ SO:
 // int csZ = 6;
 
 // Update for use with Edison Arduino Board
-
-// int csX = 7;   // jmp pin 7 to pin 10 on robogia
-//                   GPIO48 pin7 causes problems with wifi on Edison, so need to chg
-// int csY = 9;
-// int csZ = 8;
-
-//---- GPIO CS for ROBOGIA SAGA continues on Edison ----------------------------
-
-//---- Intel Edison has a big list of unresolved issues -----
-// BKM - always check the release notes for known and/or unresolved issues
-//       so you don't waste your time on known issues like this one:
-
-// -----
-// Issue: Everytime I run a program that uses this library, 
-// -----  the wifi/ssh/winscp connection dies
-
-// --- http://download.intel.com/support/edison/sb/edisonbsp_rn_332032007.pdf
-//  EDISON-2326 - SSH slow after GPIO 48 is exported
-
-// --- https://communities.intel.com/message/288094#288094
-// TITLE: Setting GP48 to output or input on breakout will affect wifi
-//  DiegoV_Intel on Mar 31, 2015 6:28 AM
-//  This is a known issue and currently it is unresolved. Please check this document 
-//  in page 11: Release Notes - Intel Edison. 
-//  **** This issue happens in the Arduino                                        ****
-//  **** Expansion Board and in the Mini-Breakout Board, and only with the GPIO48.**** 
-//  Hopefully it will be resolved in future releases.
-
-int csX = 11;   // jmp pin 11 to pin 10 on robogia
+//int csX = 7;   // jmp pin 7 to pin 10 on robogia
+int csX = 6;     // jmp pin 6 to pin 10, if use pin 7 on edison, wifi breaks
 int csY = 9;
 int csZ = 8;
 
@@ -302,7 +234,7 @@ uint8_t spi_xcv_byte(uint8_t txd_byte)
 	unsigned char rxd_bit;
 	unsigned char rcv_byte = 0;
 
-	mraa_gpio_write(SCK_pin,0);   // Clk 1->0  then drive clk low
+	// mraa_gpio_write(SCK_pin,0);   // Clk 1->0  then drive clk low
 
  	for(i=0; i<8; i++)
  	{
@@ -314,7 +246,7 @@ uint8_t spi_xcv_byte(uint8_t txd_byte)
 		rcv_byte = (rcv_byte << 1)|rxd_bit;
 	}
 
-        mraa_gpio_write(SCK_pin,1);   // Clk 0->1  
+        // mraa_gpio_write(SCK_pin,1);   // Clk 0->1  
 
 	return 	rcv_byte;
  }
@@ -463,14 +395,12 @@ EXPORTIT mtrEnc getXYEncCount(void) {
   U.y_enc_cnt = y_axis;
   U.y_ts_sec  = yt.tv_sec;
   U.y_ts_ns   = yt.tv_nsec;
-
-  /***
+/***
   printf("X axis count\t%8X\n", x_axis );
   printf("X time stamp\t%d %d\n", U.x_ts_sec, U.x_ts_ns );
   printf("Y axis count\t%8X\n", y_axis );
   printf("Y time stamp\t%d %d\n", U.y_ts_sec, U.y_ts_ns );
-  ***/
-
+***/
   return U;
 }
 
