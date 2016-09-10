@@ -1,2 +1,6 @@
+# exclude emacs backups
 *.*~
+# exclude binaries
+encoders/11-7-5-libedspi52/*.o
+encoders/espi52
 

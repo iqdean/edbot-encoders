@@ -215,7 +215,8 @@ void initGpio() {
 	mraa_gpio_use_mmaped(Ycs,1);            // use mmapped_io 
 	mraa_gpio_use_mmaped(Zcs,1);            // use mmapped_io 
 
-	gpio_set(SCK_pin, set_high);
+	//gpio_set(SCK_pin, set_high);
+	gpio_set(SCK_pin, set_low);  // ls7366 ds: sck idle state = 0
 	gpio_set(MOSI_pin, set_high);
 	gpio_set(Xcs, set_high);
 	gpio_set(Ycs, set_high);
