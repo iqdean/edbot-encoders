@@ -364,7 +364,7 @@ http://stackoverflow.com/questions/9215729/adding-data-to-a-c-buffer-passed-to-a
 // TODO: add error checking and return success OR error code
 
 EXPORTIT int edspi52_init(void) {
-  mraa_init();
+  mraa_init();  //commenting out doesn't help glitching on serial port pins?
   //printf("mraa version: %s \n", mraa_get_version());
   initGpio();
   init7366();
